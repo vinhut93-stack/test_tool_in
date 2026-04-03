@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Hệ Thống In Tag Giá Vua Nệm 2026</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/7.0.0/normalize.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/paper-css/0.4.1/paper.css">
+    <link href="https://fonts.googleapis.com/css2?family=Reddit+Sans+Condensed:wght@200..900&display=swap" rel="stylesheet">
+    <style>
+        /* 1. GIAO DIỆN ĐIỀU KHIỂN KIỂU DASHBOARD - CẬP NHẬT MỚI */
+        :root { 
+            --vuanem-blue: #1a4295; 
+            --vuanem-red: #C21D21; 
+            --bg-gray: #f4f7f6;
+            --primary-color: #a31915; 
+            --secondary-color: #FED449; 
+        }
+
+        body { background-color: var(--bg-gray); }
+        @page { size: A4 }
+        body.A4 .sheet { height: auto; min-height: 296mm; margin-bottom: 20px; background: white; box-shadow: none; }
+
+        .no-print { background: var(--bg-gray); padding-bottom: 30px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        .main-header {
+            background: var(--vuanem-blue);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        .main-header h1 { margin: 0; font-size: 24px; text-transform: uppercase; letter-spacing: 1px; font-weight: 800; }
+        .main-header p { margin: 5px 0 0; opacity: 0.8; font-size: 14px; }
+
+        .dashboard-container { 
+            max-width: 1200px; 
+            margin: -30px auto 0; 
+            display: grid; 
+            grid-template-columns: 1fr 1.5fr 1fr; 
+            gap: 20px; 
+            padding: 0 20px; 
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+        .card-title { font-weight: 700; color: #444; margin-bottom: 12px; font-size: 14px; text-transform: uppercase; }
+
+        /* Nút và Input trong Dashboard */
+        .file-upload-btn {
+            border: 2px dashed #ddd;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+            color: #666;
+            font-size: 14px;
+        }
+        .file-upload-btn:hover { border-color: var(--vuanem-blue); background: #f0f4ff; }
+
+        .search-box {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--vuanem-blue);
+            border-radius: 25px;
+            box-sizing: border-box;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .action-group { display: flex; gap: 10px; justify-content: flex-end; }
+        .btn {
+            padding: 12px 20px;
+            border-radius: 25px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 12px;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-clear { background: #e74c3c; color: white; display: none; }
+        .btn-print { background: #27ae60; color: white; }
+        .btn:hover { transform: translateY(-2px); opacity: 0.9; }
+
+        /* 2. GIỮ NGUYÊN CSS CHO TAG GIÁ CỦA BẠN */
+        #print-area { margin-top: 30px; }
+        .sale-paper { font-family: "Reddit Sans Condensed", sans-serif; position: relative; }
+        .item-heading { font-size: 20rem; line-height: 0.75; font-weight: 600; text-align: center; background: linear-gradient(to right, #C21D21, #D32027); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .policy-container { margin-top: 20px; display: flex; column-gap: 5px; }
+        .policy-item { font-size: 2.2em; padding: 20px 2px; font-weight: 700; border-radius: 15px; text-align: center; flex: 1; background: var(--primary-color); color: var(--secondary-color); display: flex; flex-direction: column; justify-content: center; line-height: 1.5; }
+        .policy-item span { display: block; }
+        .content-container { border: 5px solid var(--primary-color); border-radius: 20px; margin-top: 10px; padding: 30px 0 30px 40px; display: flex; flex-direction: column; row-gap: 15px; overflow: hidden;}
+        .product-name { color: var(--primary-color); font-size: 32px; font-weight: 700; padding-right: 40px; }
+        .product-promotion { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #ddd; padding-bottom: 10px; min-height: 120px; }
+        .size { color: #130f10; font-size: 22px; font-weight: 700; }
+        .price-group { display: flex; align-items: flex-end; line-height: 0.85; color: var(--primary-color); }
+        .old-price-val { font-size: 60px; font-weight: 700; text-decoration: line-through; }
+        .main-price-val { font-weight: 700; font-size: 100px; }
+        .sub-sale-block { display: flex; align-items: center; gap: 5px; color: #130f10; margin-top: 5px; }
+        .sub-price-item { display: flex; align-items: flex-end; line-height: 0.9; }
+        .sub-old { font-size: 40px; text-decoration: line-through; font-weight: 700; color: #666; }
+        .sub-new { font-size: 55px; font-weight: 800; color: #130f10; }
+        .arrow { border-left: 15px #130f10 solid; border-top: 10px solid transparent; border-bottom: 10px solid transparent; margin: 0 10px; }
+        .unit-box { display: flex; flex-direction: column; margin-left: 3px; font-weight: 700; }
+        .unit-top { font-size: 22px; }
+        .unit-bottom { font-size: 24px; }
+        .discount-block { background: var(--primary-color); color: white; display: inline-flex; align-items: center; justify-content: center; min-width: 220px; height: 140px; clip-path: polygon(12% 0, 100% 0, 100% 100%, 12% 100%, 0 50%); margin-right: -2px; padding: 0 10px 0 40px; }
+        .discount-text { font-size: 72px; font-weight: 800; line-height: 1; white-space: nowrap; text-align: center; width: 100%; }
+        .sub-discount-container { position: relative; min-width: 180px; height: 75px; display: flex; align-items: center; justify-content: center; margin-right: -2px; }
+        .sub-discount-border { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: var(--primary-color); clip-path: polygon(15% 0, 100% 0, 100% 100%, 15% 100%, 0 50%); }
+        .sub-discount-inner { position: absolute; top: 2px; left: 2px; right: 0; bottom: 2px; background: white; clip-path: polygon(15% 0, 100% 0, 100% 100%, 15% 100%, 0 50%); display: flex; align-items: center; justify-content: center; padding-left: 20px; }
+        .sub-discount-text { color: var(--primary-color); font-size: 40px; font-weight: 800; white-space: nowrap; text-align: center; width: 100%; }
+        .footer-container { margin-top: 15px; display: grid; grid-template-columns: 1fr auto; align-items: center; padding: 0 20px; height: 85px; }
+        .sale-text-area { text-align: center; grid-column: 1 / 2; padding: 0 10px 0 80px; display: flex; align-items: center; justify-content: center; height: 100%; overflow: hidden; }
+        .sale-text { font-size: 34px; font-weight: 700; color: var(--primary-color); text-transform: uppercase; line-height: 1.2; }
+        .qrcode-block { display: flex; align-items: center; gap: 10px; }
+
+        @media print { .no-print { display: none; } .sheet { margin: 0; box-shadow: none; } }
+    </style>
+</head>
+<body class="A4">
+    <div class="no-print">
+        <div class="main-header">
+            <h1>HỆ THỐNG IN TAG GIÁ CGPK TẠI VUA NỆM 2026</h1>
+            <p>Phát triển bởi <strong>Phan Đình Vi Nhựt</strong> | Chuyên dùng cho chuỗi cửa hàng Vua Nệm</p>
+        </div>
+
+        <div class="dashboard-container">
+            <div class="card">
+                <span class="card-title">1. Nguồn dữ liệu (Excel)</span>
+                <div class="file-upload-btn" onclick="document.getElementById('uploadExcel').click()">
+                    <span id="file-info">📁 Chọn File Excel...</span>
+                    <input type="file" id="uploadExcel" accept=".xlsx, .xls" style="display:none">
+                </div>
+            </div>
+
+            <div class="card">
+                <span class="card-title">2. Tìm & Lọc Sản Phẩm</span>
+                <input type="text" id="searchProduct" class="search-box" placeholder="Gõ tên sản phẩm cần tìm...">
+            </div>
+
+            <div class="card">
+                <span class="card-title">3. Hành động</span>
+                <div class="action-group">
+                    <button class="btn btn-clear" id="btnClear" onclick="clearAllData()">🗑️ Xóa</button>
+                    <button class="btn btn-print" onclick="window.print()">🖨️ PRINT ALL</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="print-area"></div>
+
+    <script>
+        /* GIỮ NGUYÊN TOÀN BỘ LOGIC JAVASCRIPT CỦA BẠN */
+        let fullData = [];
+
+        document.getElementById('uploadExcel').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if(!file) return;
+            
+            document.getElementById('file-info').innerText = "📄 " + file.name;
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const data = new Uint8Array(event.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                fullData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+                renderTags(fullData);
+                document.getElementById('btnClear').style.display = 'flex';
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        document.getElementById('searchProduct').addEventListener('input', function(e) {
+            const term = e.target.value.toLowerCase();
+            const filtered = fullData.filter(row => row.name && row.name.toLowerCase().includes(term));
+            renderTags(filtered);
+        });
+
+        function fmt(v) {
+            if(!v) return { main: "0", sub: ".000", raw: 0 };
+            let num = parseInt(v.toString().replace(/\D/g, ''));
+            let main = Math.floor(num / 1000).toLocaleString('de-DE');
+            let remainder = num % 1000;
+            let sub = remainder > 0 ? "." + remainder.toString().padStart(3, '0') : ".000";
+            return { main, sub, raw: num };
+        }
+
+        function clearAllData() {
+            if(confirm("Bạn có chắc chắn muốn xóa toàn bộ dữ liệu hiện tại không?")) {
+                fullData = [];
+                document.getElementById('print-area').innerHTML = '';
+                document.getElementById('uploadExcel').value = '';
+                document.getElementById('searchProduct').value = '';
+                document.getElementById('file-info').innerText = "📁 Chọn File Excel...";
+                document.getElementById('btnClear').style.display = 'none';
+            }
+        }
+
+        function renderTags(rows) {
+            const area = document.getElementById('print-area');
+            area.innerHTML = '';
+            if(rows.length === 0) {
+                area.innerHTML = '<div style="text-align:center; padding:50px; color:#ccc; font-size:24px;">Không tìm thấy sản phẩm nào</div>';
+                return;
+            }
+
+            const grouped = rows.reduce((acc, row) => {
+                const key = row.name; if (!key) return acc;
+                if (!acc[key]) acc[key] = []; acc[key].push(row);
+                return acc;
+            }, {});
+
+            for (const name in grouped) {
+                const items = grouped[name];
+                const f = items[0];
+                const discountText = f.direct_discount_text || '';
+                
+                let html = `<section class="sheet padding-10mm sale-paper">
+                    <div class="item-heading">SALE</div>
+                    <div class="policy-container">
+                        <div class="policy-item">MIỄN PHÍ<span>VẬN CHUYỂN</span></div>
+                        <div class="policy-item">NẰM THỬ<span>ĐẾN 120 ĐÊM</span></div>
+                        <div class="policy-item">TRẢ GÓP<span>0%</span></div>
+                    </div>
+                    <div class="content-container">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding-right:40px;">
+                            <div class="product-name">${name}</div>
+                            <img src="https://trade.vuanem.vn/image/logo/${f.logo || 'comfy.png'}" style="max-height:50px" onerror="this.style.display='none'">
+                        </div>`;
+
+                items.forEach((item, i) => {
+                    const pOld = fmt(item.price);
+                    const pNew = fmt(item.price_sale);
+                    let isSamePrice = pOld.raw === pNew.raw;
+                    let disDisplay = isSamePrice ? "GIÁ TỐT" : "-" + Math.round(item.percent_discount < 1 ? item.percent_discount * 100 : item.percent_discount) + "%";
+
+                    if (i === 0) {
+                        html += `<div class="product-promotion">
+                            <div style="display: flex; flex-direction: column; justify-content: center;">
+                                <div class="size">Size ${item.size}</div>
+                                ${!isSamePrice ? `<div class="price-group"><span class="old-price-val">${pOld.main}</span><div class="unit-box"><span class="unit-top">${pOld.sub}</span><span class="unit-bottom">VNĐ</span></div></div>` : ''}
+                                <div class="price-group">
+                                    <span class="main-price-val">${pNew.main}</span>
+                                    <div class="unit-box" style="margin-bottom:10px"><span class="unit-top" style="font-size:35px">${pNew.sub}</span><span class="unit-bottom" style="font-size:40px">VNĐ</span></div>
+                                </div>
+                            </div>
+                            <div class="discount-block"><div class="discount-text">${disDisplay}</div></div>
+                        </div>`;
+                    } else {
+                        html += `<div class="product-promotion" style="min-height: 80px;">
+                            <div style="display: flex; flex-direction: column; justify-content: center;">
+                                <div class="size">Size ${item.size}</div>
+                                <div class="sub-sale-block">
+                                    ${!isSamePrice ? `<div class="sub-price-item"><span class="sub-old">${pOld.main}</span><div class="unit-box old-price-group"><span class="unit-top">${pOld.sub}</span><span class="unit-bottom">VNĐ</span></div></div><div class="arrow"></div>` : ''}
+                                    <div class="sub-price-item">
+                                        <span class="sub-new">${pNew.main}</span>
+                                        <div class="unit-box sub-unit-box"><span class="unit-top">${pNew.sub}</span><span class="unit-bottom">VNĐ</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="sub-discount-container">
+                                <div class="sub-discount-border"></div>
+                                <div class="sub-discount-inner"><div class="sub-discount-text">${disDisplay}</div></div>
+                            </div>
+                        </div>`;
+                    }
+                });
+
+                html += `</div>
+                    <div class="footer-container">
+                        <div class="sale-text-area"><div class="sale-text">${discountText}</div></div>
+                        <div class="qrcode-block">
+                            <div class="qrcode-text">QUÉT MÃ<br>THÔNG TIN<br>SẢN PHẨM</div>
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(f.product_url || 'https://vuanem.com')}" style="width:80px">
+                        </div>
+                    </div>
+                </section>`;
+                area.innerHTML += html;
+            }
+        }
+    </script>
+</body>
+</html>
