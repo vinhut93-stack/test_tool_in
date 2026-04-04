@@ -5,7 +5,7 @@
     <title>Hệ thống In Tag Giá Vua Nệm - Phát triển bởi Vi Nhựt (VN5022)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        /* --- GIAO DIỆN HỆ THỐNG --- */
+        /* --- GIAO DIỆN HỆ THỐNG (GIỮ NGUYÊN) --- */
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background: #eceff1; color: #333; }
         
         #header-top {
@@ -39,90 +39,56 @@
             position: absolute; width: 100%; background: #fff; border-radius: 8px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-height: 300px; overflow-y: auto; display: none; z-index: 1001; margin-top: 5px;
         }
-        .sug-item { padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0; font-size: 13px; display: flex; justify-content: space-between; }
+        .sug-item { padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
         .sug-item:hover { background: #f5f5f5; color: #1a237e; font-weight: bold; }
+
+        /* --- CSS PHÂN BIỆT SẢN PHẨM ĐÃ CHỌN --- */
+        .sug-item.selected { 
+            background: #fdfdfd; 
+            color: #bdc3c7; 
+            cursor: default;
+            opacity: 0.7;
+        }
+        .sug-item.selected b { color: #bdc3c7; }
+        .sug-item.selected::after { 
+            content: "ĐÃ CHỌN ✓"; 
+            font-size: 10px; 
+            color: #2e7d32; 
+            font-weight: bold; 
+            background: #e8f5e9;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
 
         .btn-group { display: flex; gap: 10px; }
         .btn-print { padding: 12px 25px; background: #2e7d32; color: #fff; border: none; border-radius: 30px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; }
         .btn-all { padding: 12px 20px; background: #0277bd; color: #fff; border: none; border-radius: 30px; font-weight: bold; cursor: pointer; }
         .btn-clear { padding: 12px 20px; background: #d32f2f; color: #fff; border: none; border-radius: 30px; font-weight: bold; cursor: pointer; display: none; }
 
-        /* --- CẤU TRÚC THẺ GIÁ --- */
+        /* --- CẤU TRÚC THẺ GIÁ (GIỮ NGUYÊN) --- */
         .grid-container { display: grid; grid-template-columns: 9.2cm 9.2cm; gap: 10px; padding: 10mm; justify-content: center; }
-
         .tag-card { 
             width: 9.2cm; height: 4cm; border: 0.5pt solid #000; 
             display: flex; position: relative; box-sizing: border-box;
             background: #fff; overflow: hidden;
         }
-
-        /* Panel Trái (Đen) */
-        .left-panel {
-            background: #000; color: #fff; width: 2.8cm;
-            display: flex; flex-direction: column; align-items: center; padding: 0;
-        }
-        .discount-container {
-            position: relative; background: #fff; color: #000; width: 1.6cm; height: 0.9cm; 
-            display: flex; align-items: center; justify-content: center; margin-top: 15px;
-            clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 50% 80%, 0% 100%);
-        }
+        .left-panel { background: #000; color: #fff; width: 2.8cm; display: flex; flex-direction: column; align-items: center; padding: 0; }
+        .discount-container { position: relative; background: #fff; color: #000; width: 1.6cm; height: 0.9cm; display: flex; align-items: center; justify-content: center; margin-top: 15px; clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 50% 80%, 0% 100%); }
         .discount-tag { font-size: 19px; font-weight: bold; padding-bottom: 5px; }
         .mat-box { text-align: center; text-transform: uppercase; margin-top: 15px; flex-grow: 1; }
         .mat-label { font-size: 11px; opacity: 0.9; }
         .mat-val { font-size: 13px; font-weight: bold; display: block; margin-top: 2px; }
-        .code-label { 
-            background: #fff; color: #000; width: 100%; height: 0.8cm; 
-            display: flex; align-items: center; justify-content: center;
-            font-size: 13px; font-weight: 600; border-top: 0.5pt solid #000;
-        }
-
-        /* Panel Phải (Phần quan trọng) */
-        .right-panel { 
-            width: 6.4cm; height: 100%; display: flex; flex-direction: column; position: relative;
-        }
-
-        /* Tên sản phẩm - Nằm ở phần trên */
-        .name-container {
-            height: 1.2cm; display: flex; align-items: center; justify-content: center; padding: 5px 10px 0;
-        }
-        .name-area { 
-            text-align: center; font-size: 13px; font-weight: 600; 
-            text-transform: uppercase; line-height: 1.2;
-            max-height: 2.4em; overflow: hidden;
-        }
-
-        /* Cụm trung tâm: Giá Sale và Bonus sát nhau */
-        .center-content-wrapper {
-            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            margin-bottom: 0.8cm; /* Tránh đè lên dải đen giá cũ */
-        }
-
-        .price-sale-container {
-            display: flex; align-items: center; justify-content: center;
-        }
+        .code-label { background: #fff; color: #000; width: 100%; height: 0.8cm; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; border-top: 0.5pt solid #000; }
+        .right-panel { width: 6.4cm; height: 100%; display: flex; flex-direction: column; position: relative; }
+        .name-container { height: 1.2cm; display: flex; align-items: center; justify-content: center; padding: 5px 10px 0; }
+        .name-area { text-align: center; font-size: 13px; font-weight: 600; text-transform: uppercase; line-height: 1.2; max-height: 2.4em; overflow: hidden; }
+        .center-content-wrapper { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 0.8cm; }
+        .price-sale-container { display: flex; align-items: center; justify-content: center; }
         .p-sale { font-size: 28px; font-weight: bold; margin: 0; color: #000; letter-spacing: -1px; line-height: 1; }
-
-        .bonus-container {
-            display: flex; align-items: center; justify-content: center; 
-            padding: 0 8px; margin-top: 2px; /* Sát dưới giá sale */
-        }
-        .p-bonus { 
-            font-size: 12px; font-weight: bold; color: #333; text-transform: uppercase;
-            text-align: center; line-height: 1.1; 
-            max-height: 2.2em; /* Giới hạn 2 dòng */
-            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; 
-            overflow: hidden; word-break: break-word;
-        }
-
-        /* Dải giá cũ đáy */
-        .old-price-bar {
-            background: #000; color: #fff; height: 0.8cm; width: 100%;
-            display: flex; align-items: center; justify-content: center; 
-            font-size: 14px; font-weight: bold; position: absolute; bottom: 0; left: 0;
-            border-left: 0.5pt solid #fff; box-sizing: border-box;
-        }
+        .bonus-container { display: flex; align-items: center; justify-content: center; padding: 0 8px; margin-top: 2px; }
+        .p-bonus { font-size: 12px; font-weight: bold; color: #333; text-transform: uppercase; text-align: center; line-height: 1.1; max-height: 2.2em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; }
+        .old-price-bar { background: #000; color: #fff; height: 0.8cm; width: 100%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; position: absolute; bottom: 0; left: 0; border-left: 0.5pt solid #fff; box-sizing: border-box; }
         .p-old { text-decoration: line-through; font-weight: normal; margin-left: 5px; }
-
         .btn-del { position: absolute; top: 5px; right: 5px; background: rgba(255,0,0,0.8); color: #fff; border: none; border-radius: 50%; cursor: pointer; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; z-index: 10; font-size: 10px; }
 
         @media print {
@@ -167,7 +133,7 @@
 <div id="printArea" class="grid-container"></div>
 
 <footer class="no-print" style="text-align: center; padding: 20px; color: #888; font-size: 12px;">
-    &copy; 2026 Vua Nệm - Version 3.1. Designed by Phan Đinh Vi Nhựt.
+    &copy; 2026 Vua Nệm - Version 3.3. Designed by Phan Đinh Vi Nhựt.
 </footer>
 
 <script>
@@ -195,14 +161,16 @@
         if(confirm("Xóa tất cả danh sách đang chọn?")) {
             listSelected = [];
             render();
+            updateSuggestions(); // Cập nhật lại danh sách gợi ý
         }
     }
 
     const inp = document.getElementById('searchInput');
     const sug = document.getElementById('suggestions');
 
-    inp.addEventListener('input', function() {
-        const key = this.value.trim().toLowerCase();
+    // Hàm cập nhật danh sách gợi ý tách riêng để tái sử dụng
+    function updateSuggestions() {
+        const key = inp.value.trim().toLowerCase();
         sug.innerHTML = '';
         if(!key || dataInventory.length === 0) { sug.style.display = 'none'; return; }
 
@@ -213,20 +181,29 @@
 
         if(filtered.length > 0) {
             filtered.forEach(item => {
+                const alreadySelected = listSelected.some(s => s.itemcode === item.itemcode);
                 const div = document.createElement('div');
-                div.className = 'sug-item';
+                div.className = 'sug-item' + (alreadySelected ? ' selected' : '');
                 div.innerHTML = `<span>🏷️ <b>${item.itemcode}</b> - ${item.name}</span>`;
-                div.onclick = function() {
-                    listSelected.push(item);
-                    render();
-                    sug.style.display = 'none';
-                    inp.value = '';
+                
+                div.onclick = function(e) {
+                    e.stopPropagation(); // Ngăn sự kiện click lan ra ngoài
+                    if(!alreadySelected) {
+                        listSelected.push(item);
+                        render();
+                        updateSuggestions(); // Làm mới danh sách gợi ý (giữ chữ trong ô tìm kiếm)
+                    }
                 };
                 sug.appendChild(div);
             });
             sug.style.display = 'block';
+        } else {
+            sug.style.display = 'none';
         }
-    });
+    }
+
+    inp.addEventListener('input', updateSuggestions);
+    inp.addEventListener('click', updateSuggestions);
 
     function render() {
         const box = document.getElementById('printArea');
@@ -241,7 +218,7 @@
             const card = document.createElement('div');
             card.className = 'tag-card';
             card.innerHTML = `
-                <button class="btn-del no-print" onclick="listSelected.splice(${idx},1); render();">✕</button>
+                <button class="btn-del no-print" onclick="removeFromList(${idx})">✕</button>
                 <div class="left-panel">
                     <div class="discount-container"><div class="discount-tag">-${item.discount_percentage || item.discount_pe || 0}%</div></div>
                     <div class="mat-box"><span class="mat-label">CHẤT LIỆU</span><span class="mat-val">${(item.material || 'N/A').toUpperCase()}</span></div>
@@ -271,7 +248,19 @@
         });
     }
 
-    document.addEventListener('click', (e) => { if(!inp.contains(e.target)) sug.style.display = 'none'; });
+    // Hàm xóa sp và cập nhật lại gợi ý ngay lập tức
+    function removeFromList(index) {
+        listSelected.splice(index, 1);
+        render();
+        updateSuggestions();
+    }
+
+    // Chỉ ẩn gợi ý khi click ra ngoài vùng tìm kiếm
+    document.addEventListener('click', (e) => { 
+        if(!inp.contains(e.target) && !sug.contains(e.target)) {
+            sug.style.display = 'none';
+        }
+    });
 </script>
 </body>
 </html>
