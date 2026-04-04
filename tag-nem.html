@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="utf-8">
     <title>Hệ Thống In Tag Giá Vua Nệm 2026</title>
@@ -8,25 +8,52 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/paper-css/0.4.1/paper.css">
     <link href="https://fonts.googleapis.com/css2?family=Reddit+Sans+Condensed:wght@200..900&display=swap" rel="stylesheet">
     <style>
-        /* 1. GIAO DIỆN ĐIỀU KHIỂN KIỂU DASHBOARD - CẬP NHẬT MỚI */
         :root { 
-            --vuanem-blue: #1a4295; 
+            --vuanem-blue: #A51C1A; 
             --vuanem-red: #C21D21; 
             --bg-gray: #f4f7f6;
             --primary-color: #a31915; 
             --secondary-color: #FED449; 
         }
 
-        body { background-color: var(--bg-gray); }
-        @page { size: A4 }
-        body.A4 .sheet { height: auto; min-height: 296mm; margin-bottom: 20px; background: white; box-shadow: none; }
+        body { background-color: var(--bg-gray); margin: 0; padding: 0; }
+
+        /* 1. XỬ LÝ TRIỆT ĐỂ LỀ TRANG VÀ CHIỀU CAO */
+        @page { 
+            size: A4; 
+            margin: 0; 
+        }
+
+        body.A4 .sheet { 
+            width: 210mm;
+            height: 297mm; /* Khóa chiều cao tuyệt đối A4 */
+            margin: 0 auto 20px auto; 
+            background: white; 
+            position: relative; 
+            display: block; 
+            box-sizing: border-box; /* Padding không làm tăng kích thước trang */
+            padding: 10mm; /* Tự định nghĩa thay cho thư viện */
+            overflow: hidden; /* Triệt tiêu nội dung thừa gây trang trắng */
+        }
+
+        /* 2. NGẮT TRANG DỨT KHOÁT KHI IN */
+        @media print { 
+            body { background: none; }
+            .no-print, .system-footer, .remove-page-btn { display: none !important; } 
+            #print-area { margin-top: 0 !important; }
+            body.A4 .sheet { 
+                margin: 0 !important; 
+                box-shadow: none !important; 
+                page-break-after: always; /* Luôn ngắt trang sau mỗi thẻ section */
+            } 
+        }
 
         .no-print { background: var(--bg-gray); padding-bottom: 30px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         
         .main-header {
             background: var(--vuanem-blue);
             color: white;
-            padding: 20px 0;
+            padding: 20px 0 50px;
             text-align: center;
             box-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
@@ -35,11 +62,13 @@
 
         .dashboard-container { 
             max-width: 1200px; 
-            margin: -30px auto 0; 
+            margin: -25px auto 0; 
             display: grid; 
             grid-template-columns: 1fr 1.5fr 1fr; 
             gap: 20px; 
             padding: 0 20px; 
+            position: relative;
+            z-index: 10;
         }
 
         .card {
@@ -49,10 +78,10 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             display: flex;
             flex-direction: column;
+            position: relative;
         }
         .card-title { font-weight: 700; color: #444; margin-bottom: 12px; font-size: 14px; text-transform: uppercase; }
 
-        /* Nút và Input trong Dashboard */
         .file-upload-btn {
             border: 2px dashed #ddd;
             padding: 12px;
@@ -75,6 +104,32 @@
             font-size: 14px;
         }
 
+        #search-results {
+            position: absolute;
+            top: 100%;
+            left: 20px;
+            right: 20px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .search-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .search-item:hover { background: #f8f9fa; color: var(--vuanem-blue); }
+        .already-selected { color: #27ae60; font-weight: 600; font-size: 11px; background: #eafaf1; padding: 2px 8px; border-radius: 10px; }
+
         .action-group { display: flex; gap: 10px; justify-content: flex-end; }
         .btn {
             padding: 12px 20px;
@@ -90,19 +145,67 @@
             gap: 8px;
         }
         .btn-clear { background: #e74c3c; color: white; display: none; }
-        .btn-print { background: #27ae60; color: white; }
+        .btn-print-all { background: var(--vuanem-red); color: white; display: none; }
+        .btn-print-window { background: #27ae60; color: white; }
         .btn:hover { transform: translateY(-2px); opacity: 0.9; }
 
-        /* 2. GIỮ NGUYÊN CSS CHO TAG GIÁ CỦA BẠN */
         #print-area { margin-top: 30px; }
         .sale-paper { font-family: "Reddit Sans Condensed", sans-serif; position: relative; }
-        .item-heading { font-size: 20rem; line-height: 0.75; font-weight: 600; text-align: center; background: linear-gradient(to right, #C21D21, #D32027); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        .remove-page-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #ff4757;
+            color: white;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            transition: 0.2s;
+            padding: 0;
+        }
+        .remove-page-btn:hover { background: #ff6b81; transform: scale(1.1); }
+        .remove-page-btn svg { width: 12px; height: 12px; stroke: white; stroke-width: 2.5; stroke-linecap: round; }
+
+        .item-heading { 
+            font-size: 20rem; 
+            line-height: 0.75; 
+            font-weight: 600; 
+            text-align: center; 
+            color: var(--vuanem-red); 
+        }
+
         .policy-container { margin-top: 20px; display: flex; column-gap: 5px; }
-        .policy-item { font-size: 2.2em; padding: 20px 2px; font-weight: 700; border-radius: 15px; text-align: center; flex: 1; background: var(--primary-color); color: var(--secondary-color); display: flex; flex-direction: column; justify-content: center; line-height: 1.5; }
+        .policy-item { font-size: 2.2em; padding: 16px 2px; font-weight: 700; border-radius: 15px; text-align: center; flex: 1; background: var(--primary-color); color: var(--secondary-color); display: flex; flex-direction: column; justify-content: center; line-height: 1.5; }
         .policy-item span { display: block; }
-        .content-container { border: 5px solid var(--primary-color); border-radius: 20px; margin-top: 10px; padding: 30px 0 30px 40px; display: flex; flex-direction: column; row-gap: 15px; overflow: hidden;}
+        
+        .content-container { 
+            border: 5px solid var(--primary-color); 
+            border-radius: 20px; 
+            margin-top: 10px; 
+            padding: 30px 0 10px 40px; 
+            display: flex; 
+            flex-direction: column; 
+            row-gap: 15px; 
+            overflow: hidden;
+        }
         .product-name { color: var(--primary-color); font-size: 32px; font-weight: 700; padding-right: 40px; }
-        .product-promotion { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #ddd; padding-bottom: 10px; min-height: 120px; }
+        
+        .product-promotion { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding-bottom: 10px; 
+            min-height: 120px; 
+        }
+
         .size { color: #130f10; font-size: 22px; font-weight: 700; }
         .price-group { display: flex; align-items: flex-end; line-height: 0.85; color: var(--primary-color); }
         .old-price-val { font-size: 60px; font-weight: 700; text-decoration: line-through; }
@@ -116,24 +219,56 @@
         .unit-top { font-size: 22px; }
         .unit-bottom { font-size: 24px; }
         .discount-block { background: var(--primary-color); color: white; display: inline-flex; align-items: center; justify-content: center; min-width: 220px; height: 140px; clip-path: polygon(12% 0, 100% 0, 100% 100%, 12% 100%, 0 50%); margin-right: -2px; padding: 0 10px 0 40px; }
-        .discount-text { font-size: 72px; font-weight: 800; line-height: 1; white-space: nowrap; text-align: center; width: 100%; }
+        .discount-text { font-size: 85px; font-weight: 800; line-height: 0.7; white-space: nowrap; text-align: center; width: 100%; }
         .sub-discount-container { position: relative; min-width: 180px; height: 75px; display: flex; align-items: center; justify-content: center; margin-right: -2px; }
         .sub-discount-border { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: var(--primary-color); clip-path: polygon(15% 0, 100% 0, 100% 100%, 15% 100%, 0 50%); }
         .sub-discount-inner { position: absolute; top: 2px; left: 2px; right: 0; bottom: 2px; background: white; clip-path: polygon(15% 0, 100% 0, 100% 100%, 15% 100%, 0 50%); display: flex; align-items: center; justify-content: center; padding-left: 20px; }
         .sub-discount-text { color: var(--primary-color); font-size: 40px; font-weight: 800; white-space: nowrap; text-align: center; width: 100%; }
-        .footer-container { margin-top: 15px; display: grid; grid-template-columns: 1fr auto; align-items: center; padding: 0 20px; height: 85px; }
+        
+        .footer-container { 
+            margin-top: 1px;
+            display: grid; 
+            grid-template-columns: 1fr auto; 
+            align-items: center; 
+            padding: 0 20px; 
+            height: 85px; 
+        }
         .sale-text-area { text-align: center; grid-column: 1 / 2; padding: 0 10px 0 80px; display: flex; align-items: center; justify-content: center; height: 100%; overflow: hidden; }
-        .sale-text { font-size: 34px; font-weight: 700; color: var(--primary-color); text-transform: uppercase; line-height: 1.2; }
-        .qrcode-block { display: flex; align-items: center; gap: 10px; }
+        
+        .sale-text { 
+            font-size: 34px; 
+            font-weight: 700; 
+            color: var(--primary-color); 
+            text-transform: uppercase; 
+            line-height: 1.1; 
+            word-break: break-word;
+            display: -webkit-box;
+            -webkit-line-clamp: 3; 
+            -webkit-box-orient: vertical;
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            width: 100%;
+            padding-top: 1px; 
+            max-height: 3.4em; 
+        }
 
-        @media print { .no-print { display: none; } .sheet { margin: 0; box-shadow: none; } }
+        .qrcode-block { display: flex; align-items: center; gap: 10px; }
+        .qrcode-text { font-weight: 700; font-size: 14px; line-height: 1.2; text-align: right; }
+
+        .system-footer {
+            text-align: center;
+            padding: 20px;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 13px;
+            color: #888;
+        }
     </style>
 </head>
 <body class="A4">
     <div class="no-print">
         <div class="main-header">
-            <h1>HỆ THỐNG IN TAG GIÁ CGPK TẠI VUA NỆM 2026</h1>
-            <p>Phát triển bởi <strong>Phan Đình Vi Nhựt</strong> | Chuyên dùng cho chuỗi cửa hàng Vua Nệm</p>
+            <h1>HỆ THỐNG IN TAG GIÁ ĐỆM TẠI VUA NỆM 2026</h1>
+            <p>Phát triển bởi <strong>Vi Nhựt (VN5022)</strong> | Chuyên dùng cho chuỗi cửa hàng Vua Nệm</p>
         </div>
 
         <div class="dashboard-container">
@@ -148,13 +283,15 @@
             <div class="card">
                 <span class="card-title">2. Tìm & Lọc Sản Phẩm</span>
                 <input type="text" id="searchProduct" class="search-box" placeholder="Gõ tên sản phẩm cần tìm...">
+                <div id="search-results"></div>
             </div>
 
             <div class="card">
                 <span class="card-title">3. Hành động</span>
                 <div class="action-group">
-                    <button class="btn btn-clear" id="btnClear" onclick="clearAllData()">🗑️ Xóa</button>
-                    <button class="btn btn-print" onclick="window.print()">🖨️ PRINT ALL</button>
+                    <button class="btn btn-clear" id="btnClear" onclick="clearAllData()">🗑️ XOÁ TẤT CẢ</button>
+                    <button class="btn btn-print-all" id="btnPrintAll" onclick="showAllTags()">🖨️ PRINT ALL</button>
+                    <button class="btn btn-print-window" onclick="window.print()">🖨️ IN TRANG</button>
                 </div>
             </div>
         </div>
@@ -162,31 +299,115 @@
 
     <div id="print-area"></div>
 
+    <div class="system-footer">
+        © 2026 Vua Nệm - Version 3.4. Designed by Phan Đinh Vi Nhựt.
+    </div>
+
     <script>
-        /* GIỮ NGUYÊN TOÀN BỘ LOGIC JAVASCRIPT CỦA BẠN */
         let fullData = [];
+        let selectedProductCounts = {}; 
+
+        function adjustFontSize(element) {
+            if (!element) return;
+            let fontSize = parseInt(window.getComputedStyle(element).fontSize);
+            const maxHeight = parseInt(window.getComputedStyle(element).lineHeight) * 3.1;
+            while (element.scrollHeight > maxHeight && fontSize > 12) {
+                fontSize -= 1;
+                element.style.fontSize = fontSize + "px";
+            }
+        }
 
         document.getElementById('uploadExcel').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if(!file) return;
-            
             document.getElementById('file-info').innerText = "📄 " + file.name;
             const reader = new FileReader();
             reader.onload = function(event) {
                 const data = new Uint8Array(event.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
                 fullData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-                renderTags(fullData);
-                document.getElementById('btnClear').style.display = 'flex';
+                
+                document.getElementById('print-area').innerHTML = '';
+                document.getElementById('btnPrintAll').style.display = 'flex';
+                document.getElementById('btnClear').style.display = 'none';
+                selectedProductCounts = {}; 
             };
             reader.readAsArrayBuffer(file);
         });
 
         document.getElementById('searchProduct').addEventListener('input', function(e) {
             const term = e.target.value.toLowerCase();
-            const filtered = fullData.filter(row => row.name && row.name.toLowerCase().includes(term));
-            renderTags(filtered);
+            const resultsDiv = document.getElementById('search-results');
+            
+            if (!term) {
+                resultsDiv.style.display = 'none';
+                return;
+            }
+
+            const uniqueNames = [...new Set(fullData.map(item => item.name))].filter(name => name && name.toLowerCase().includes(term));
+            
+            if (uniqueNames.length > 0) {
+                resultsDiv.innerHTML = uniqueNames.map(name => {
+                    const count = selectedProductCounts[name] || 0;
+                    const statusHtml = count > 0 ? `<span class="already-selected">Đã chọn: ${count}</span>` : '';
+                    return `<div class="search-item" onclick="selectProduct('${name.replace(/'/g, "\\'")}')">
+                        <span>${name}</span>
+                        ${statusHtml}
+                    </div>`;
+                }).join('');
+                resultsDiv.style.display = 'block';
+            } else {
+                resultsDiv.style.display = 'none';
+            }
         });
+
+        function selectProduct(name) {
+            const filtered = fullData.filter(row => row.name === name);
+            selectedProductCounts[name] = (selectedProductCounts[name] || 0) + 1;
+            
+            renderTags(filtered, true, name); 
+            document.getElementById('search-results').style.display = 'none';
+            document.getElementById('searchProduct').value = ''; 
+            
+            document.getElementById('btnPrintAll').style.display = 'none';
+            document.getElementById('btnClear').style.display = 'flex';
+        }
+
+        function showAllTags() {
+            selectedProductCounts = {};
+            fullData.forEach(item => {
+                if (item.name) {
+                    selectedProductCounts[item.name] = 1;
+                }
+            });
+            renderTags(fullData, false); 
+            document.getElementById('btnPrintAll').style.display = 'none';
+            document.getElementById('btnClear').style.display = 'flex';
+        }
+
+        function clearAllData() {
+            document.getElementById('print-area').innerHTML = '';
+            document.getElementById('searchProduct').value = '';
+            document.getElementById('btnClear').style.display = 'none';
+            selectedProductCounts = {}; 
+            if(fullData.length > 0) {
+                document.getElementById('btnPrintAll').style.display = 'flex';
+            }
+        }
+
+        function removePage(btn, name) {
+            const page = btn.closest('.sheet');
+            page.remove();
+            
+            if (name && selectedProductCounts[name]) {
+                selectedProductCounts[name]--;
+                if (selectedProductCounts[name] <= 0) delete selectedProductCounts[name];
+            }
+
+            if (document.getElementById('print-area').children.length === 0) {
+                clearAllData();
+            }
+        }
 
         function fmt(v) {
             if(!v) return { main: "0", sub: ".000", raw: 0 };
@@ -197,24 +418,10 @@
             return { main, sub, raw: num };
         }
 
-        function clearAllData() {
-            if(confirm("Bạn có chắc chắn muốn xóa toàn bộ dữ liệu hiện tại không?")) {
-                fullData = [];
-                document.getElementById('print-area').innerHTML = '';
-                document.getElementById('uploadExcel').value = '';
-                document.getElementById('searchProduct').value = '';
-                document.getElementById('file-info').innerText = "📁 Chọn File Excel...";
-                document.getElementById('btnClear').style.display = 'none';
-            }
-        }
-
-        function renderTags(rows) {
+        function renderTags(rows, append = false) {
             const area = document.getElementById('print-area');
-            area.innerHTML = '';
-            if(rows.length === 0) {
-                area.innerHTML = '<div style="text-align:center; padding:50px; color:#ccc; font-size:24px;">Không tìm thấy sản phẩm nào</div>';
-                return;
-            }
+            if(!append) area.innerHTML = '';
+            if(rows.length === 0) return;
 
             const grouped = rows.reduce((acc, row) => {
                 const key = row.name; if (!key) return acc;
@@ -227,7 +434,14 @@
                 const f = items[0];
                 const discountText = f.direct_discount_text || '';
                 
-                let html = `<section class="sheet padding-10mm sale-paper">
+                const section = document.createElement('section');
+                // SỬA: Bỏ padding-10mm của thư viện để dùng CSS tự định nghĩa ở trên
+                section.className = 'sheet sale-paper'; 
+                
+                const xIcon = `<svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.5 1.5L13.5 13.5M13.5 1.5L1.5 13.5" stroke="currentColor"/></svg>`;
+
+                let html = `
+                    <button class="remove-page-btn no-print" onclick="removePage(this, '${name.replace(/'/g, "\\'")}')">${xIcon}</button>
                     <div class="item-heading">SALE</div>
                     <div class="policy-container">
                         <div class="policy-item">MIỄN PHÍ<span>VẬN CHUYỂN</span></div>
@@ -285,11 +499,21 @@
                             <div class="qrcode-text">QUÉT MÃ<br>THÔNG TIN<br>SẢN PHẨM</div>
                             <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(f.product_url || 'https://vuanem.com')}" style="width:80px">
                         </div>
-                    </div>
-                </section>`;
-                area.innerHTML += html;
+                    </div>`;
+                
+                section.innerHTML = html;
+                area.appendChild(section);
+                
+                const saleTextEl = section.querySelector('.sale-text');
+                if (saleTextEl) adjustFontSize(saleTextEl);
             }
         }
+        
+        document.addEventListener('click', function(e) {
+            if (!document.getElementById('searchProduct').contains(e.target)) {
+                document.getElementById('search-results').style.display = 'none';
+            }
+        });
     </script>
 </body>
 </html>
