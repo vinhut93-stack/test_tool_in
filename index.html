@@ -3,36 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống In Tag Giá</title>
+    <title>Hệ Thống In Tag Giá - Vua Nệm</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background-color: #f4f4f9; }
-        h1 { color: #333; }
-        .container { display: flex; gap: 20px; }
-        .btn {
-            padding: 20px 40px;
-            font-size: 1.2rem;
-            cursor: pointer;
-            border: none;
-            border-radius: 8px;
-            background-color: #007bff;
-            color: white;
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #28a745;
+            --bg-color: #f0f2f5;
+            --text-color: #1c1e21;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #333;
+        }
+
+        .header p {
+            color: #65676b;
+            font-size: 1.1rem;
+        }
+
+        .container { 
+            display: flex; 
+            gap: 25px; 
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            width: 280px;
+            padding: 30px;
+            border-radius: 16px;
             text-decoration: none;
-            transition: background 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e4e6eb;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+
+        .icon-box {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+
+        /* Màu sắc riêng cho từng nút */
+        .nem { color: var(--primary-color); background-color: #e7f3ff; }
+        .cgpk { color: var(--secondary-color); background-color: #eafbe7; }
+
+        .card h2 {
+            margin: 10px 0;
+            font-size: 1.4rem;
+            color: #050505;
+        }
+
+        .card span {
+            font-size: 0.9rem;
+            color: #65676b;
             text-align: center;
         }
-        .btn:hover { background-color: #0056b3; }
-        .btn-cgpk { background-color: #28a745; }
-        .btn-cgpk:hover { background-color: #218838; }
+
+        .btn-action {
+            margin-top: 20px;
+            padding: 10px 25px;
+            border-radius: 20px;
+            background: #f0f2f5;
+            color: #050505;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: 0.3s;
+        }
+
+        .card:hover .btn-action {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .card.card-cgpk:hover .btn-action {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        /* Responsive cho điện thoại */
+        @media (max-width: 600px) {
+            .card { width: 100%; max-width: 300px; }
+            .header h1 { font-size: 1.5rem; }
+        }
     </style>
 </head>
 <body>
 
-    <h1>CHỌN CÔNG CỤ IN</h1>
+    <div class="header">
+        <h1>Hệ Thống In Ấn</h1>
+        <p>Vui lòng chọn loại Tag giá cần in</p>
+    </div>
     
     <div class="container">
-        <a href="tag-nem.html" class="btn">IN TAG GIÁ NỆM</a>
+        <a href="tag-nem.html" class="card card-nem">
+            <div class="icon-box nem">
+                <i class="fas fa-bed"></i>
+            </div>
+            <h2>TAG GIÁ NỆM</h2>
+            <span>Dành cho các dòng nệm cao su, lò xo, foam...</span>
+            <div class="btn-action">Truy cập Tool</div>
+        </a>
         
-        <a href="tag-cgpk.html" class="btn btn-cgpk">IN TAG GIÁ CGPK</a>
+        <a href="tag-cgpk.html" class="card card-cgpk">
+            <div class="icon-box cgpk">
+                <i class="fas fa-pump-medical"></i>
+            </div>
+            <h2>TAG GIÁ CGPK</h2>
+            <span>Dành cho Chăn Ga Phụ Kiện & các lẻ khác</span>
+            <div class="btn-action">Truy cập Tool</div>
+        </a>
     </div>
 
 </body>
