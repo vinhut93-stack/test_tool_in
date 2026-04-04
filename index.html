@@ -3,153 +3,250 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống In Tag Giá - Vua Nệm</title>
+    <title>Hệ Thống In Tag Giá - Vua Nệm (Official)</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;800&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         :root {
-            --primary-color: #007bff;
-            --secondary-color: #28a745;
-            --bg-color: #f0f2f5;
-            --text-color: #1c1e21;
+            --vuanem-blue: #00205B;
+            --vuanem-gold: #FFD700;
+            --bg-light: #f4f7fa;
+            --glass: rgba(255, 255, 255, 0.95);
         }
 
         body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            font-family: 'Be Vietnam Pro', sans-serif; 
+            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            justify-content: center; 
             min-height: 100vh; 
             margin: 0; 
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            padding: 20px;
         }
 
         .header {
             text-align: center;
+            margin-top: 50px;
             margin-bottom: 40px;
         }
 
         .header h1 {
-            font-size: 2rem;
-            margin-bottom: 10px;
+            color: var(--vuanem-blue);
+            font-size: 32px;
+            font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #333;
+            margin: 10px 0;
+            letter-spacing: -0.5px;
         }
 
         .header p {
-            color: #65676b;
-            font-size: 1.1rem;
+            color: #475569;
+            font-size: 16px;
+            font-weight: 400;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            background: #ffffff;
+            color: #059669;
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+        }
+
+        .status-dot {
+            height: 8px;
+            width: 8px;
+            background-color: #10b981;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
 
         .container { 
             display: flex; 
-            gap: 25px; 
+            gap: 30px; 
             flex-wrap: wrap;
             justify-content: center;
-            padding: 20px;
+            max-width: 900px;
+            width: 100%;
         }
 
         .card {
-            background: white;
-            width: 280px;
-            padding: 30px;
-            border-radius: 16px;
+            background: var(--glass);
+            width: 320px;
+            padding: 40px 25px;
+            border-radius: 30px;
             text-decoration: none;
             display: flex;
             flex-direction: column;
             align-items: center;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            border: 1px solid #e4e6eb;
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+            border: 1px solid rgba(255,255,255,0.8);
+            position: relative;
         }
 
         .card:hover {
             transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 25px 50px rgba(0,32,91,0.12);
+            border-color: rgba(0,32,91,0.2);
         }
 
-        .icon-box {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
+        .icon-wrapper {
+            width: 100px;
+            height: 100px;
+            border-radius: 28px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 20px;
-            font-size: 2rem;
+            font-size: 42px;
+            margin-bottom: 25px;
         }
 
-        /* Màu sắc riêng cho từng nút */
-        .nem { color: var(--primary-color); background-color: #e7f3ff; }
-        .cgpk { color: var(--secondary-color); background-color: #eafbe7; }
+        .nem-theme .icon-wrapper { background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); color: #4338ca; }
+        .cgpk-theme .icon-wrapper { background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); color: #15803d; }
 
         .card h2 {
-            margin: 10px 0;
-            font-size: 1.4rem;
-            color: #050505;
+            margin: 0;
+            font-size: 22px;
+            color: #1e293b;
+            font-weight: 700;
         }
 
-        .card span {
-            font-size: 0.9rem;
-            color: #65676b;
+        .card p {
+            font-size: 15px;
+            color: #64748b;
             text-align: center;
+            line-height: 1.5;
+            margin: 15px 0 30px 0;
+            font-weight: 400;
         }
 
-        .btn-action {
-            margin-top: 20px;
-            padding: 10px 25px;
-            border-radius: 20px;
-            background: #f0f2f5;
-            color: #050505;
+        .go-btn {
+            width: 55px;
+            height: 55px;
+            border-radius: 50px;
+            background: var(--vuanem-blue);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.3s;
+        }
+
+        .card:hover .go-btn {
+            width: 160px;
+            background: #003087;
+        }
+
+        .card:hover .go-btn::after {
+            content: "BẮT ĐẦU IN";
+            margin-left: 12px;
+            font-size: 14px;
             font-weight: 600;
-            font-size: 0.9rem;
-            transition: 0.3s;
+            letter-spacing: 0.5px;
         }
 
-        .card:hover .btn-action {
-            background: var(--primary-color);
-            color: white;
+        .footer {
+            margin-top: auto;
+            padding: 40px 20px;
+            text-align: center;
+            color: #64748b;
+            font-size: 14px;
         }
 
-        .card.card-cgpk:hover .btn-action {
-            background: var(--secondary-color);
-            color: white;
+        .copyright-notice {
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 12px;
+            line-height: 1.6;
+            max-width: 500px;
+            display: inline-block;
         }
 
-        /* Responsive cho điện thoại */
-        @media (max-width: 600px) {
-            .card { width: 100%; max-width: 300px; }
-            .header h1 { font-size: 1.5rem; }
+        .dev-name {
+            font-weight: 600;
+            color: var(--vuanem-blue);
+            background: rgba(0, 32, 91, 0.05);
+            padding: 5px 12px;
+            border-radius: 8px;
+            margin-left: 5px;
+        }
+
+        .copyright-icon {
+            color: #ef4444;
+            margin-right: 5px;
+        }
+
+        @media (max-width: 700px) {
+            .container { flex-direction: column; align-items: center; }
+            .card { width: 85%; }
+            .header h1 { font-size: 26px; }
         }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>Hệ Thống In Ấn</h1>
-        <p>Vui lòng chọn loại Tag giá cần in</p>
+        <div class="status-badge">
+            <span class="status-dot"></span>Hệ thống máy chủ ổn định
+        </div>
+        <h1>CÔNG CỤ IN TAG GIÁ</h1>
+        <p>Hệ thống hỗ trợ in ấn nội bộ Vua Nệm Năm 2026</p>
     </div>
     
     <div class="container">
-        <a href="tag-nem.html" class="card card-nem">
-            <div class="icon-box nem">
+        <a href="tag-nem.html" class="card nem-theme">
+            <div class="icon-wrapper">
                 <i class="fas fa-bed"></i>
             </div>
-            <h2>TAG GIÁ NỆM</h2>
-            <span>Dành cho các dòng nệm cao su, lò xo, foam...</span>
-            <div class="btn-action">Truy cập Tool</div>
+            <h2>TAG GIÁ CHO ĐỆM</h2>
+            <p>Tối ưu cho nệm Cao su, Lò xo, Foam, Bông ép. Tự động lấy kích thước chuẩn.</p>
+            <div class="go-btn"><i class="fas fa-chevron-right"></i></div>
         </a>
         
-        <a href="tag-cgpk.html" class="card card-cgpk">
-            <div class="icon-box cgpk">
-                <i class="fas fa-pump-medical"></i>
+        <a href="tag-cgpk.html" class="card cgpk-theme">
+            <div class="icon-wrapper">
+                <i class="fas fa-tags"></i>
             </div>
-            <h2>TAG GIÁ CGPK</h2>
-            <span>Dành cho Chăn Ga Phụ Kiện & các lẻ khác</span>
-            <div class="btn-action">Truy cập Tool</div>
+            <h2>TAG GIÁ CHO CGPK</h2>
+            <p>Dành cho Chăn, Ga, Gối, Phụ kiện và các sản phẩm khác.</p>
+            <div class="go-btn"><i class="fas fa-chevron-right"></i></div>
         </a>
+    </div>
+
+    <div class="footer">
+        <p>© 2026 Toàn quyền bởi Vua Nệm - Quy Nhơn</p>
+        <p>Phát triển bởi <span class="dev-name">Vi Nhựt (VN5022) - 0358969752 </span></p>
+        
+        <div class="copyright-notice">
+            <i class="fas fa-shield-halved copyright-icon"></i>
+            <strong>THÔNG BÁO PHÁP LÝ:</strong><br>
+            Sản phẩm đã được đăng ký bản quyền tại <strong>Cục Sở hữu trí tuệ</strong>.<br>
+            Nghiêm cấm mọi hành vi sao chép, chỉnh sửa hoặc phân phối lại mã nguồn dưới mọi hình thức khi chưa có sự đồng ý bằng văn bản của tác giả.
+        </div>
     </div>
 
 </body>
