@@ -3,121 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vua Nệm - Quy Nhơn Internal</title>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore-compat.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
+    <title>Hệ thống Vua Nệm Quy Nhơn</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --primary: #002c77; --accent: #f6891f; }
-        body { font-family: sans-serif; background: var(--primary); display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .login-box { background: white; padding: 30px; border-radius: 12px; width: 350px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; outline: none; }
-        .pass-container { position: relative; }
-        .eye { position: absolute; right: 12px; top: 22px; cursor: pointer; color: #aaa; }
-        button { width: 100%; padding: 12px; background: var(--accent); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        #main-app { display: none; background: #f4f4f4; width: 100%; height: 100vh; position: fixed; top: 0; left: 0; padding: 20px; box-sizing: border-box; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); max-width: 600px; margin: auto; }
+        :root {
+            --vuanem-blue: #002c77;
+            --vuanem-orange: #f6891f;
+            --bg: #f8fafc;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: var(--vuanem-blue);
+            font-size: 32px;
+            font-weight: 900;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .header p {
+            color: #64748b;
+            margin-bottom: 40px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 20px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(0, 44, 119, 0.05);
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            border-color: var(--vuanem-orange);
+            box-shadow: 0 15px 30px rgba(0, 44, 119, 0.15);
+        }
+
+        .icon-box {
+            width: 70px;
+            height: 70px;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 30px;
+            color: white;
+        }
+
+        .bg-blue { background: var(--vuanem-blue); }
+        .bg-orange { background: var(--vuanem-orange); }
+
+        .card h2 {
+            margin: 0 0 10px;
+            color: #1e293b;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .card p {
+            color: #64748b;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .footer {
+            margin-top: 50px;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+
+        @media (max-width: 600px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
 
-<div id="login-screen">
-    <div class="login-box">
-        <img src="https://tonkinmedia.vn/wp-content/uploads/2023/03/image-removebg-preview-7.png" width="150">
-        <h2 style="color: var(--primary); margin: 15px 0;">HỆ THỐNG NỘI BỘ</h2>
-        <input type="email" id="email" placeholder="Email nhân viên">
-        <div class="pass-container">
-            <input type="password" id="pass" placeholder="Mật khẩu">
-            <i class="fa-solid fa-eye eye" id="eyeIcon" onclick="togglePass()"></i>
+    <div class="container">
+        <div class="header">
+            <h1>VUA NỆM QUY NHƠN</h1>
+            <p>Hệ thống hỗ trợ bán hàng chuyên nghiệp</p>
         </div>
-        <button onclick="login()">ĐĂNG NHẬP</button>
-        <p id="err" style="color:red; font-size:12px; margin-top:10px; display:none"></p>
+
+        <div class="dashboard-grid">
+            <a href="baogia.html" class="card">
+                <div class="icon-box bg-blue">
+                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                </div>
+                <h2>Lập Báo Giá Nhanh</h2>
+                <p>Công cụ in báo giá chuyên nghiệp cho khách hàng tại Vua Nệm Quy Nhơn.</p>
+            </a>
+
+            <a href="voucher.html" class="card">
+                <div class="icon-box bg-orange">
+                    <i class="fa-solid fa-ticket"></i>
+                </div>
+                <h2>Voucher</h2>
+                <p>Áp dụng các chương trình khuyến mãi và voucher mới nhất.</p>
+            </a>
+        </div>
+
+        <div class="footer">
+            PHÁT TRIỂN BỞI VI NHỰT (VN5022) • VUA NỆM 2026
+        </div>
     </div>
-</div>
 
-<div id="main-app">
-    <div class="card">
-        <h2 id="welcome" style="color: var(--primary);">Đang tải dữ liệu...</h2>
-        <p>Phiên bản quản lý chi nhánh Quy Nhơn (BDI01 - BDI02)</p>
-        <hr>
-        <button onclick="firebase.auth().signOut()" style="background: #ef4444; width: auto;">Đăng xuất</button>
-    </div>
-</div>
-
-<script>
-    // --- KHỞI TẠO TẬP TRUNG ---
-    const firebaseConfig = { 
-        projectId: "vuanem-d66e5", 
-        authDomain: "vuanem-d66e5.firebaseapp.com" 
-    };
-    
-    // Khởi tạo App trước
-    const app = firebase.initializeApp(firebaseConfig);
-    // Sau đó mới khởi tạo Auth và DB
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-
-    // Hiện/Ẩn mật khẩu
-    function togglePass() {
-        const p = document.getElementById('pass');
-        const icon = document.getElementById('eyeIcon');
-        if (p.type === 'password') {
-            p.type = 'text';
-            icon.classList.replace('fa-eye', 'fa-eye-slash');
-        } else {
-            p.type = 'password';
-            icon.classList.replace('fa-eye-slash', 'fa-eye');
-        }
-    }
-
-    // Hàm đăng nhập
-    async function login() {
-        const e = document.getElementById('email').value.trim();
-        const p = document.getElementById('pass').value;
-        const err = document.getElementById('err');
-        err.style.display = 'none';
-
-        if(!e || !p) {
-            err.innerText = "Vui lòng nhập đủ Email và Mật khẩu";
-            err.style.display = 'block';
-            return;
-        }
-
-        try {
-            await auth.signInWithEmailAndPassword(e, p);
-        } catch (error) {
-            err.style.display = 'block';
-            err.innerText = "Lỗi: " + error.message;
-        }
-    }
-
-    // Theo dõi trạng thái đăng nhập
-    auth.onAuthStateChanged(async (user) => {
-        const loginScreen = document.getElementById('login-screen');
-        const mainApp = document.getElementById('main-app');
-        
-        if (user) {
-            // Lấy thông tin từ Firestore (Dựa trên hình image_bd3bf5.png của Nhựt)
-            try {
-                const doc = await db.collection("users").doc(user.email).get();
-                if (doc.exists) {
-                    loginScreen.style.display = 'none';
-                    mainApp.style.display = 'block';
-                    document.getElementById('welcome').innerText = "Chào mừng Store Manager: " + doc.data().fullname;
-                } else {
-                    alert("Tài khoản này chưa có dữ liệu trên Firestore!");
-                    auth.signOut();
-                }
-            } catch (e) {
-                console.error("Lỗi Firestore:", e);
-            }
-        } else {
-            loginScreen.style.display = 'flex';
-            mainApp.style.display = 'none';
-        }
-    });
-</script>
 </body>
 </html>
