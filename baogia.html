@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chuỗi Vua Nệm Quy Nhơn</title>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root { 
+            --primary: #002c77; --accent: #f6891f; --text: #2c3e50; 
+            --light-bg: #f8fafc; --border: #0f1824; --danger: #ef4444; 
+        }
+        
+        body { font-family: 'Inter', 'Segoe UI', Arial, sans-serif; margin: 0; padding: 10px; background-color: #e5e7eb; color: var(--text); font-size: 13px; -webkit-tap-highlight-color: transparent; }
+        .container { max-width: 850px; margin: 0 auto; background: white; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); overflow: hidden; }
+        
+        .header-top { background: linear-gradient(135deg, var(--primary) 0%, #0045b5 100%); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .brand-info h1 { margin: 0; font-size: 20px; font-weight: 900; letter-spacing: -0.5px; }
+        .brand-info p { margin: 2px 0 5px 0; opacity: 0.9; font-size: 11px; }
+        .badge-row { display: flex; gap: 4px; flex-wrap: wrap; }
+        .badge { background: rgba(255,255,255,0.15); padding: 1px 6px; border-radius: 4px; font-size: 9px; white-space: nowrap; }
+        .so-number { font-size: 18px; color: var(--accent); font-weight: 800; }
+        
+        .content-body { padding: 15px; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        @media (max-width: 600px) { .info-grid { grid-template-columns: 1fr; } }
+        
+        .card { background: var(--light-bg); padding: 12px; border-radius: 6px; border: 1px solid var(--border); }
+        .card-title { font-size: 11px; font-weight: 800; color: var(--primary); margin-bottom: 8px; text-transform: uppercase; border-left: 3px solid var(--accent); padding-left: 8px; }
+        
+        .input-group { margin-bottom: 8px; }
+        label { display: block; font-size: 10px; font-weight: 700; color: #090621; margin-bottom: 2px; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; box-sizing: border-box; transition: border 0.2s; }
+        
+        .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        th { padding: 8px; font-size: 10px; border-bottom: 2px solid var(--primary); text-align: left; color: #090621; }
+        td { padding: 10px 8px; border-bottom: 1px solid var(--border); }
+        .p-name-display { font-weight: 600; color: var(--primary); font-size: 12px; line-height: 1.3; }
+        
+        .bottom-section { display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; margin-top: 15px; }
+        @media (max-width: 600px) { .bottom-section { grid-template-columns: 1fr; } }
+        
+        .summary-table { background: #f1f5f9; padding: 15px; border-radius: 8px; border: 1px dashed var(--primary); }
+        .summary-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; }
+        .summary-row.grand-total { margin-top: 10px; padding-top: 10px; border-top: 2px solid var(--primary); font-weight: 700; font-size: 18px; color: var(--primary); }
+        
+        .signature-section { margin-top: 30px; display: grid; grid-template-columns: 1fr 1fr; text-align: center; padding-top: 20px; }
+        .sig-box p { font-weight: 700; margin-bottom: 60px; font-size: 12px; }
+
+        .actions { max-width: 850px; margin: 15px auto; display: flex; gap: 10px; }
+        .btn { flex: 1; padding: 15px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; }
+        .btn-save { background: #10b981; color: white; box-shadow: 0 4px 0 #059669; }
+        .btn-print { background: var(--primary); color: white; box-shadow: 0 4px 0 #001f54; }
+        .btn-add { background: white; border: 1px dashed var(--primary); color: var(--primary); padding: 8px; width: auto; font-size: 12px; margin-top: 8px; cursor: pointer; border-radius: 4px; }
+
+        /* FIX MẤT CHỮ VÀ DỌN DẸP KHI XUẤT ẢNH */
+        .exporting .no-print, .exporting .btn, .exporting .btn-add, .exporting .hide-on-export, .exporting button { display: none !important; }
+        .exporting input, .exporting textarea, .exporting select { 
+            border: none !important; background: transparent !important; padding: 0 !important; 
+            appearance: none !important; -webkit-appearance: none !important; 
+            color: black !important; font-weight: 600 !important; height: auto !important;
+        }
+        .exporting .card { box-shadow: none !important; border: 1px solid #eee !important; }
+        .exporting .container { box-shadow: none !important; border: none !important; }
+
+        @media print {
+            body { padding: 0; background: white; }
+            .no-print, .btn, .btn-add, .hide-on-export, button { display: none !important; }
+            input, textarea, select { border: none !important; padding: 0 !important; background: transparent !important; font-size: 13px !important; appearance: none !important; }
+.exporting.container { width: 850px !important; min-width: 850px !important; max-width: 850px !important; 
+	}
+        }
+    </style>
+</head>
+<body>
+
+<div id="capture-area" class="container">
+    <div class="header-top">
+        <div class="brand-info">
+            <h1>HỆ THỐNG VUA NỆM - QUY NHƠN</h1>
+            <p>Ngủ ngon - Sống trọn cùng Vua Nệm</p>
+            <div class="badge-row">
+                <span class="badge">🚚 Miễn phí giao hàng</span>
+                <span class="badge">💳 Trả góp 0%</span>
+                <span class="badge">🔄 Ngủ thử đến 120 đêm</span>
+            </div>
+        </div>
+        <div class="quote-id-box">
+            <div style="font-size: 9px; opacity: 0.8; text-align: right;">SALES ORDER</div>
+            <div class="so-number">#SO<span id="qDate"></span></div>
+            <div id="currentDate" style="font-size: 10px; margin-top: 2px; text-align: right;"></div>
+        </div>
+    </div>
+
+    <div class="content-body">
+        <div class="info-grid">
+            <div class="card">
+                <div class="card-title">Thông tin Khách hàng</div>
+                <div class="input-group"><label>Họ tên</label><input type="text" id="custName" placeholder="Tên khách hàng..."></div>
+                <div class="input-group"><label>Điện thoại</label><input type="tel" id="custPhone" maxlength="10" placeholder="0xxxxxxxxx"></div>
+                <div class="input-group"><label>Địa chỉ</label><textarea id="custAddr" rows="1" placeholder="Địa chỉ giao hàng..."></textarea></div>
+            </div>
+            <div class="card">
+                <div class="card-title">Nhân viên tư vấn</div>
+                <div class="input-group">
+                    <label>Nhân viên hỗ trợ</label>
+                    <select id="staffSelect" onchange="updateStaff()">
+                        <option value="Em Hoà|0969233949">Văn Hoà</option>
+                        <option value="Em Trinh|0908852960">Kiều Trinh</option>
+                        <option value="Em Quyên|0325575531">Kiều Quyên</option>
+                        <option value="Vi Nhựt|0358969752" selected>Vi Nhựt</option>
+                        <option value="khac">Khác...</option>
+                    </select>
+                </div>
+                <div id="customStaffBox" style="display: none;">
+                    <div class="input-group"><label>Tên nhân viên</label><input type="text" id="customStaffName" placeholder="Nhập tên..."></div>
+                </div>
+                <div class="input-group"><label>Số điện thoại liên hệ</label><input type="text" id="staffPhone" value="0358969752"></div>
+            </div>
+        </div>
+
+        <div class="card-title">Chi tiết đơn hàng</div>
+        <div class="table-wrapper">
+            <table id="productTable">
+                <thead>
+                    <tr>
+                        <th width="15%">Mã SP</th>
+                        <th width="45%">Tên sản phẩm</th>
+                        <th width="10%" style="text-align: center;">SL</th>
+                        <th width="15%" style="text-align: right;">Đơn giá</th>
+                        <th width="15%" style="text-align: right;">Tổng</th>
+                        <th width="5%" class="no-print"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="text" class="p-code" placeholder="Mã..." oninput="debounceSearch(this)"></td>
+                        <td><div class="p-name-display">Chọn sản phẩm...</div></td>
+                        <td><input type="number" class="p-qty" value="1" min="1" oninput="calculateRow(this)" style="text-align: center;"></td>
+                        <td><input type="text" class="p-price" value="0" oninput="formatCurrencyInput(this)" style="text-align: right;"></td>
+                        <td class="p-total" style="text-align: right; font-weight: 700; color: var(--primary);">0</td>
+                        <td class="no-print" style="text-align: center;"><button class="btn-add" style="color:red; border-color:red" onclick="removeRow(this)">✕</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <button class="btn btn-add no-print" onclick="addRow()">+ Thêm dòng sản phẩm</button>
+
+        <div class="bottom-section">
+            <div>
+                <div class="card-title">Ghi chú & Ưu đãi</div>
+                <textarea id="orderNote" rows="2" style="margin-bottom:10px" placeholder="Nhập ghi chú..."></textarea>
+                <div class="hide-on-export">
+                    <div id="voucherList"></div>
+                    <button class="btn btn-add" onclick="addVoucher()">+ Thêm giảm giá</button>
+                    <div id="paymentList"></div>
+                    <button class="btn btn-add" onclick="addPayment()">+ Thêm khoản đã cọc</button>
+                </div>
+            </div>
+            <div class="summary-table">
+                <div class="summary-row"><span>Tổng tiền hàng:</span><span id="subTotal">0</span></div>
+                <div class="summary-row" style="color: #660606; font-weight: 600;"><span>Tổng giảm giá:</span><span id="totalDiscount">- 0</span></div>
+                <div class="summary-row" style="color: #120463;"><span>Đã đặt cọc:</span><span id="paidTotal">0</span></div>
+                <div class="summary-row grand-total"><span>CÒN LẠI:</span><span id="grandTotal">0 đ</span></div>
+            </div>
+        </div>
+
+        <div class="signature-section">
+            <div class="sig-box"><p>Khách hàng</p></div>
+            <div class="sig-box"><p>Nhân viên tư vấn</p></div>
+        </div>
+    </div>
+</div>
+
+<div class="actions no-print">
+    <button class="btn btn-save" onclick="saveImage()">💾 LƯU ẢNH GỬI ZALO</button>
+    <button class="btn btn-print" onclick="triggerPrint()">🖨️ XUẤT FILE IN / PDF</button>
+</div>
+
+<script>
+    // NHỰT NHỚ THAY API KEY VÀO ĐÂY NHÉ
+    const firebaseConfig = { apiKey: "AIzaSyCFPWPMIHdZUJwpNJ75o1FK9AamecKSRCI", projectId: "vuanem-d66e5", authDomain: "vuanem-d66e5.firebaseapp.com" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    
+    function updateTime() {
+        const now = new Date();
+        document.getElementById('currentDate').innerText = `Ngày lập: ${now.toLocaleDateString('vi-VN')} | ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+        document.getElementById('qDate').innerText = now.getTime().toString().slice(-6);
+    }
+    updateTime();
+
+    function updateStaff() {
+        const select = document.getElementById('staffSelect');
+        const phoneInput = document.getElementById('staffPhone');
+        if(select.value === 'khac') {
+            document.getElementById('customStaffBox').style.display = 'block';
+            phoneInput.value = "";
+        } else {
+            document.getElementById('customStaffBox').style.display = 'none';
+            phoneInput.value = select.value.split('|')[1];
+        }
+    }
+
+    function formatCurrencyInput(input) {
+        let value = input.value.replace(/\D/g, "");
+        input.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        if (input.classList.contains('p-price')) calculateRow(input);
+        else calculateTotal();
+    }
+
+    let searchTimer;
+    function debounceSearch(input) {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => getProductInfo(input), 500);
+    }
+
+    async function getProductInfo(input) {
+        const row = input.closest('tr');
+        const code = input.value.trim();
+        const displayDiv = row.querySelector('.p-name-display');
+        if (!code) return;
+        displayDiv.innerText = "🔍...";
+        try {
+            const doc = await db.collection("products").doc(code).get();
+            if (doc.exists) {
+                const data = doc.data();
+                displayDiv.innerText = data.item_name;
+                if (data.unit_price) {
+                    row.querySelector('.p-price').value = data.unit_price.toLocaleString('vi-VN');
+                    calculateRow(input);
+                }
+            } else { displayDiv.innerText = "❌ Không thấy mã"; }
+        } catch (e) { displayDiv.innerText = "⚠️ Lỗi"; }
+    }
+
+    function addRow() {
+        const tbody = document.querySelector('#productTable tbody');
+        const row = tbody.insertRow();
+        row.innerHTML = `<td><input type="text" class="p-code" oninput="debounceSearch(this)"></td><td><div class="p-name-display">...</div></td><td><input type="number" class="p-qty" value="1" min="1" oninput="calculateRow(this)" style="text-align: center;"></td><td><input type="text" class="p-price" value="0" oninput="formatCurrencyInput(this)" style="text-align: right;"></td><td class="p-total" style="text-align: right; font-weight: 700; color: var(--primary);">0</td><td class="no-print" style="text-align: center;"><button class="btn-add" style="color:red; border-color:red" onclick="removeRow(this)">✕</button></td>`;
+    }
+
+    function removeRow(btn) {
+        if(document.querySelectorAll('#productTable tbody tr').length > 1) btn.closest('tr').remove();
+        calculateTotal();
+    }
+
+    function calculateRow(input) {
+        const row = input.closest('tr');
+        const qty = parseFloat(row.querySelector('.p-qty').value) || 0;
+        const price = parseFloat(row.querySelector('.p-price').value.replace(/\./g, "")) || 0;
+        row.querySelector('.p-total').innerText = (qty * price).toLocaleString('vi-VN');
+        calculateTotal();
+    }
+
+    function calculateTotal() {
+        let subTotal = 0;
+        document.querySelectorAll('.p-total').forEach(cell => subTotal += parseFloat(cell.innerText.replace(/\./g, '')) || 0);
+        let totalDiscount = 0;
+        let currentRemaining = subTotal; 
+        document.querySelectorAll('.voucher-item').forEach(v => {
+            const type = v.querySelector('.v-type').value;
+            const val = parseFloat(v.querySelector('.v-value').value.replace(/\./g, '')) || 0;
+            let discountAmount = (type === 'amount') ? val : currentRemaining * (val / 100);
+            totalDiscount += discountAmount;
+            currentRemaining -= discountAmount; 
+        });
+        let paidTotal = 0;
+        document.querySelectorAll('.pay-amount').forEach(p => paidTotal += parseFloat(p.value.replace(/\./g, '')) || 0);
+        document.getElementById('subTotal').innerText = subTotal.toLocaleString('vi-VN');
+        document.getElementById('totalDiscount').innerText = "- " + Math.round(totalDiscount).toLocaleString('vi-VN');
+        document.getElementById('paidTotal').innerText = paidTotal.toLocaleString('vi-VN');
+        const final = subTotal - totalDiscount - paidTotal;
+        document.getElementById('grandTotal').innerText = (final > 0 ? Math.round(final) : 0).toLocaleString('vi-VN') + " đ";
+    }
+
+    function addVoucher() {
+        const div = document.createElement('div');
+        div.className = 'voucher-item';
+        div.style = "display:flex; gap:5px; margin-bottom:8px;";
+        div.innerHTML = `<select class="v-type" style="flex: 1;" onchange="calculateTotal()"><option value="amount">Tiền mặt</option><option value="percent">% CK</option></select><input type="text" class="v-value" style="flex: 1;" value="0" oninput="formatCurrencyInput(this)"><button class="btn-add" style="margin:0; color:red" onclick="this.parentElement.remove(); calculateTotal();">✕</button>`;
+        document.getElementById('voucherList').appendChild(div);
+    }
+
+    function addPayment() {
+        const div = document.createElement('div');
+        div.style = "display:flex; gap:5px; margin-bottom:8px;";
+        div.innerHTML = `<select style="flex: 1;"><option>CK</option><option>Tiền mặt</option></select><input type="text" class="pay-amount" style="flex: 1;" value="0" oninput="formatCurrencyInput(this)"><button class="btn-add" style="margin:0; color:red" onclick="this.parentElement.remove(); calculateTotal();">✕</button>`;
+        document.getElementById('paymentList').appendChild(div);
+    }
+
+    function saveImage() {
+    const area = document.querySelector("#capture-area");
+    prepareForExport();
+    area.classList.add('exporting');
+
+    // Chờ 1 chút để giao diện kịp chuyển sang chế độ exporting
+    setTimeout(() => {
+        html2canvas(area, { 
+            scale: 2, // Độ nét vừa đủ để gửi Zalo không quá nặng
+            useCORS: true, 
+            backgroundColor: "#ffffff",
+            width: 850, // Cố định chiều rộng vùng chụp
+            windowWidth: 850 // Giả lập màn hình rộng 850px dù đang ở trên điện thoại
+        }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `VuaNem_${document.getElementById('qDate').innerText}.png`;
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+            area.classList.remove('exporting');
+        });
+    }, 200);
+}
+
+    function triggerPrint() {
+        prepareForExport();
+        document.querySelector("#capture-area").classList.add('exporting');
+        window.print();
+        setTimeout(() => document.querySelector("#capture-area").classList.remove('exporting'), 1000);
+    }
+
+    function prepareForExport() {
+        const select = document.getElementById('staffSelect');
+        const customName = document.getElementById('customStaffName').value;
+        let tempOption = select.querySelector('option[data-temp="true"]') || document.createElement('option');
+        if(!tempOption.parentNode) { tempOption.setAttribute('data-temp', 'true'); select.add(tempOption); }
+        tempOption.text = (select.value === 'khac') ? (customName || "Nhân viên") : select.options[select.selectedIndex].text;
+        tempOption.selected = true;
+    }
+</script>
+</body>
+</html>
