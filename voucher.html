@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Vua Nệm - Hệ Thống Quản Lý Voucher Pro</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #1a2a6c;
+            --accent-color: #fdbb2d;
+            --bg-body: #f4f7f9;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: var(--bg-body); 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            margin: 0; 
+            min-height: 100vh;
+        }
+
+        header {
+            width: 100%;
+            background: var(--primary-color);
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+        header h1 { margin: 0; font-size: 22px; letter-spacing: 1px; }
+        header p { margin: 5px 0 0; font-size: 12px; opacity: 0.8; }
+
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .admin-panel { 
+            background: white; 
+            padding: 25px; 
+            border-radius: 15px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
+            width: 480px; 
+            max-width: 100%; 
+            margin-bottom: 40px;
+            border: 1px solid #e1e8ed;
+            box-sizing: border-box;
+        }
+        
+        .admin-panel h2 { 
+            margin: 0 0 20px 0; 
+            color: var(--primary-color); 
+            text-align: center; 
+            font-size: 20px; 
+            font-weight: 800;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+        }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px; color: #444; }
+        .form-group input, .form-group select { 
+            width: 100%; padding: 10px; border: 1px solid #ced4da; 
+            border-radius: 8px; box-sizing: border-box; font-size: 14px; 
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus { border-color: var(--primary-color); outline: none; }
+        
+        .phone-warning { color: #e63946; font-size: 11px; margin-top: 5px; display: block; font-weight: bold; }
+        
+        #action-group {
+            display: none;
+        }
+
+        .btn-print { 
+            background: var(--primary-color); color: white; width: 100%; 
+            padding: 14px; border: none; border-radius: 8px; 
+            font-size: 16px; font-weight: bold; cursor: pointer; 
+            transition: all 0.3s; box-shadow: 0 4px 10px rgba(26, 42, 108, 0.3);
+            margin-top: 10px;
+        }
+        .btn-print:hover { transform: translateY(-2px); opacity: 0.9; }
+
+        .btn-copy { 
+            background: #28a745; color: white; width: 100%; 
+            padding: 14px; border: none; border-radius: 8px; 
+            font-size: 16px; font-weight: bold; cursor: pointer; 
+            transition: all 0.3s; box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+            margin-top: 10px;
+        }
+        .btn-copy:hover { transform: translateY(-2px); opacity: 0.9; }
+
+        /* Nút Tải ảnh mới */
+        .btn-download {
+            background: #ff7e5f; color: white; width: 100%; 
+            padding: 14px; border: none; border-radius: 8px; 
+            font-size: 16px; font-weight: bold; cursor: pointer; 
+            transition: all 0.3s; box-shadow: 0 4px 10px rgba(255, 126, 95, 0.3);
+            margin-top: 10px;
+        }
+        .btn-download:hover { transform: translateY(-2px); opacity: 0.9; }
+
+        #voucher-to-print {
+            width: 750px; height: 320px; background: white; border-radius: 15px;
+            display: flex; box-shadow: 0 15px 45px rgba(0,0,0,0.1); overflow: hidden; border: 1px solid #eee;
+            margin-bottom: 50px;
+            flex-shrink: 0;
+        }
+        .v-left {
+            width: 250px; background: var(--accent-color); display: flex; justify-content: center; align-items: center; position: relative;
+        }
+        .v-logo-container { 
+            background: white; padding: 20px; border-radius: 12px; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            width: 180px; height: 120px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+        }
+        .v-logo { width: 100%; height: auto; object-fit: contain; }
+        
+        .v-left::after {
+            content: ""; position: absolute; right: -10px; top: 0; width: 20px; height: 100%;
+            background-image: radial-gradient(circle, white 5px, transparent 6px);
+            background-size: 20px 20px; background-position: 10px 0;
+        }
+
+        .v-right { flex: 1; padding: 20px 30px; display: flex; flex-direction: column; justify-content: space-between; }
+        .v-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .v-code { font-size: 35px; font-weight: 900; color: #b21f1f; text-transform: uppercase; margin: 0; }
+        .v-link { font-size: 12px; color: #007bff; text-decoration: underline; font-weight: bold; cursor: pointer; }
+        .v-desc { font-size: 15px; color: #444; margin: 8px 0; line-height: 1.5; min-height: 45px; font-weight: 500; }
+        
+        .v-footer-info { border-top: 1px solid #eee; padding-top: 12px; }
+        .v-customer-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .v-name-tag { background: #fff5d7; color: #1a2a6c; font-weight: bold; padding: 4px 12px; border-radius: 15px; font-size: 15px; border: 1px solid #fce3a1; }
+        .v-hsd-tag { background: #e63946; color: white; font-weight: bold; padding: 4px 12px; border-radius: 8px; font-size: 13px; box-shadow: 0 2px 5px rgba(230, 57, 70, 0.3); }
+
+        .v-bottom-row { display: flex; justify-content: space-between; align-items: flex-end; }
+        .v-address-box { font-size: 12px; color: #555; line-height: 1.6; border-left: 3px solid var(--accent-color); padding-left: 12px; flex: 1; }
+        .v-policy-box { display: flex; gap: 8px; margin-top: 12px; border-top: 1px dashed #ddd; padding-top: 10px; }
+        .policy-item { font-size: 11px; font-weight: bold; color: var(--primary-color); background: #f0f4ff; padding: 4px 10px; border-radius: 6px; display: flex; align-items: center; border: 1px solid #d0daff; }
+        .icon-policy { width: 14px; height: 14px; margin-right: 5px; fill: var(--primary-color); }
+        .info-item { display: flex; align-items: center; margin-bottom: 2px; }
+        .icon-svg { width: 13px; height: 13px; margin-right: 6px; fill: var(--primary-color); }
+
+        @media screen and (max-width: 768px) {
+            #voucher-to-print {
+                transform: scale(0.45);
+                transform-origin: top center;
+                margin-bottom: -150px;
+            }
+            .admin-panel { width: 95%; padding: 15px; }
+            header h1 { font-size: 18px; }
+        }
+
+        footer {
+            width: 100%; background: #fff; color: #777; padding: 20px 0;
+            text-align: center; font-size: 13px; border-top: 1px solid #e1e8ed;
+        }
+
+        @media print {
+            header, .admin-panel, footer, #action-group { display: none !important; }
+            body { background: white; padding: 0; }
+            #voucher-to-print { 
+                box-shadow: none; border: 1px solid #ddd; 
+                margin: 0; position: absolute; top: 0; left: 0;
+                transform: scale(1) !important;
+                -webkit-print-color-adjust: exact; 
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>VUA NỆM - QUY NHƠN</h1>
+        <p>Hệ thống khởi tạo và quản lý Voucher chăm sóc khách hàng do Vi Nhựt (VN5022) phát triển ver2.0</p>
+    </header>
+
+    <div class="container">
+        <div class="admin-panel">
+            <h2>CẤU HÌNH VOUCHER</h2>
+            <div class="form-group">
+                <label>Tên khách hàng:</label>
+                <input type="text" id="inName" placeholder="Ví dụ: Anh Nguyễn Văn A" oninput="update()">
+            </div>
+            <div class="form-group">
+                <label>Số điện thoại khách:</label>
+                <input type="text" id="inPhone" placeholder="Ví dụ: 0358969752" oninput="update()">
+                <span id="phoneWarning" class="phone-warning">⚠️ Vui lòng nhập đủ 10 số điện thoại</span>
+            </div>
+            
+            <div class="form-group">
+                <label>Nhân viên tư vấn (Hotline):</label>
+                <select id="hotlineSelect" onchange="toggleHotlineInput()">
+                    <option value="0325575531 (Em Quyên)">0325575531 (Em Quyên)</option>
+                    <option value="0969233949 (Em Hoà)">0969233949 (Em Hoà)</option>
+                    <option value="0908852960 (Em Trinh)">0908852960 (Em Trinh)</option>
+                    <option value="0358969752 (Em Nhựt)">0358969752 (Em Nhựt)</option>
+                    <option value="custom">-- Nhập tay số khác --</option>
+                </select>
+                <input type="text" id="inHotlineCustom" placeholder="SĐT và Tên nhân viên..." style="display:none; margin-top:8px;" oninput="update()">
+            </div>
+
+            <div class="form-group">
+                <label>Nội dung ưu đãi:</label>
+                <input type="text" id="inDesc" value="Giảm giá trực tiếp khi mua sắm tại cửa hàng hoặc liên hệ nhân viên tư vấn cụ thể." oninput="update()">
+            </div>
+            <div class="form-group">
+                <label>Mã Voucher:</label>
+                <input type="text" id="inCode" value="GIAM500K" oninput="update()">
+            </div>
+            <div class="form-group">
+                <label>Hạn sử dụng (HSD):</label>
+                <input type="text" id="inHsd" oninput="update()">
+            </div>
+            
+            <div id="action-group">
+                <button class="btn-print" onclick="logToSheet('In Voucher'); window.print();">XUẤT FILE IN (CONTROL + P)</button>
+                <button class="btn-copy" id="btnCopy" onclick="copyVoucherImage()">SAO CHÉP ẢNH (Áp dụng laptop)</button>
+                <button class="btn-download" id="btnDownload" onclick="downloadVoucherImage()">TẢI ẢNH VỀ ĐIỆN THOẠI</button>
+            </div>
+        </div>
+
+        <div id="voucher-to-print">
+            <div class="v-left">
+                <div class="v-logo-container">
+                    <img class="v-logo" src="logo_vuanem.png" alt="Logo">
+                </div>
+            </div>
+            <div class="v-right">
+                <div class="v-header">
+                    <p class="v-code" id="outCode">GIAM500K</p>
+                    <span class="v-link">Điều kiện sử dụng</span>
+                </div>
+                <div class="v-desc" id="outDesc">Giảm giá trực tiếp cho đơn hàng, liên hệ nhân viên cửa hàng để được sử dụng mã.</div>
+                <div class="v-footer-info">
+                    <div class="v-customer-row">
+                        <div>Thân tặng: <span class="v-name-tag" id="outName">Khách Hàng</span> <span id="outPhone" style="font-size: 13px; color:#777; margin-left:8px; font-weight: bold;"></span></div>
+                        <div class="v-hsd-tag">HSD: <span id="outHsd"></span></div>
+                    </div>
+                    <div class="v-bottom-row">
+                        <div class="v-address-box">
+                            <div class="info-item">
+                                <svg class="icon-svg" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.26 1.12.32 2.33.5 3.57.5.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.18 2.45.5 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+                                <b>Hotline hỗ trợ: </b>&nbsp;<span id="outHotline">0325575531 (Em Quyên)</span>
+                            </div>
+                            <div class="info-item">
+                                <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                                <b>CN1:</b> 233-235 Nguyễn Thái Học, Quy Nhơn (Ngã 3 Võ Văn Dũng)
+                            </div>
+                            <div class="info-item">
+                                <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                                <b>CN2:</b> An Phú Thịnh Plaza, Trần Quý Cáp (Sát bên Cafe Highland)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="v-policy-box">
+                        <span class="policy-item">
+                            <svg class="icon-policy" viewBox="0 0 24 24"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM17 8.5h2.46l2.04 2.73V13h-4.5V8.5zM18 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+                            Miễn phí giao hàng
+                        </span>
+                        <span class="policy-item">
+                            <svg class="icon-policy" viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.2c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3.26 1.48 3.26 2.47 0 1.39-1.1 2.21-2.9 2.21-1.87 0-2.67-1.01-2.76-2.21H6.2c.1 1.99 1.51 3.39 3.6 3.86V21h3v-2.14c1.99-.37 3.51-1.61 3.51-3.67.01-2.61-2.01-3.6-4.91-4.29z"/></svg>
+                            Trả góp 0% lãi suất
+                        </span>
+                        <span class="policy-item">
+                            <svg class="icon-policy" viewBox="0 0 24 24"><path d="M10 21h4c0 1.1-.9 2-2 2s-2-.9-2-2zM12 2C7.03 2 3 6.03 3 11c0 2.97 1.47 5.59 3.7 7.18.66.47.3 1.82 1.3 1.82h8c1 0 .64-1.35 1.3-1.82C19.53 16.59 21 13.97 21 11c0-4.97-4.03-9-9-9zm4 10.66c0 .74-.6 1.34-1.34 1.34s-1.34-.6-1.34-1.34S13.92 9.32 12.66 9.32s-1.26 1.34-1.26 1.34S10.14 10.66 10.14 11.32s-.6 1.34-1.34 1.34-1.34-.6-1.34-1.34C7.46 9.8 8.41 8.5 9.75 8.5h4.5c1.34 0 2.29 1.3 2.29 2.82zM12 4c-1.38 0-2.5 1.12-2.5 2.5h5C14.5 5.12 13.38 4 12 4z"/></svg>
+                            Ngủ thử 120 đêm
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 <b>Phan Đinh Vi Nhựt</b>. All rights reserved. Designed for Vua Nệm Quy Nhơn.</p>
+    </footer>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzhS9I6_GchZ7uA4GzUEcg2-Ac5ux-o0hSTEx0CJSgEuXjaFg9GpIi6qnkhPHT2dSMcUQ/exec";
+
+        async function logToSheet(action) {
+            const select = document.getElementById('hotlineSelect');
+            const custom = document.getElementById('inHotlineCustom').value;
+            const staffName = (select.value === 'custom') ? custom : select.value;
+            const data = {
+                staff: staffName,
+                customer: document.getElementById('inName').value || "Khách Hàng",
+                phone: document.getElementById('inPhone').value || "Không có",
+                code: document.getElementById('inCode').value,
+                description: document.getElementById('inDesc').value,
+                hsd: document.getElementById('inHsd').value,
+                action: action
+            };
+            try {
+                fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+            } catch (e) { console.error("Lỗi lưu log", e); }
+        }
+
+        window.onload = function() {
+            let hsdDate = new Date();
+            hsdDate.setDate(hsdDate.getDate() + 14);
+            document.getElementById('inHsd').value = String(hsdDate.getDate()).padStart(2, '0') + '.' + String(hsdDate.getMonth() + 1).padStart(2, '0') + '.' + hsdDate.getFullYear();
+            update();
+        };
+
+        function toggleHotlineInput() {
+            const select = document.getElementById('hotlineSelect');
+            document.getElementById('inHotlineCustom').style.display = (select.value === 'custom') ? 'block' : 'none';
+            update();
+        }
+
+        function update() {
+            const name = document.getElementById('inName').value;
+            const phone = document.getElementById('inPhone').value;
+            const desc = document.getElementById('inDesc').value;
+            const code = document.getElementById('inCode').value;
+            const hsd = document.getElementById('inHsd').value;
+
+            document.getElementById('outName').innerText = name || "Khách Hàng";
+            document.getElementById('outPhone').innerText = phone;
+            document.getElementById('phoneWarning').style.display = (phone.length === 10) ? 'none' : 'block';
+
+            const select = document.getElementById('hotlineSelect');
+            const customHotline = document.getElementById('inHotlineCustom').value;
+            document.getElementById('outHotline').innerText = (select.value === 'custom') ? (customHotline || "SĐT - Tên nhân viên") : select.value;
+
+            document.getElementById('outCode').innerText = code;
+            document.getElementById('outDesc').innerText = desc;
+            document.getElementById('outHsd').innerText = hsd;
+
+            const actionGroup = document.getElementById('action-group');
+            if (name.trim() !== "" && phone.trim().length === 10 && desc.trim() !== "" && code.trim() !== "") {
+                actionGroup.style.display = "block";
+            } else {
+                actionGroup.style.display = "none";
+            }
+        }
+
+        async function copyVoucherImage() {
+            const btn = document.getElementById('btnCopy');
+            const voucher = document.getElementById('voucher-to-print');
+            btn.innerText = "⏳ ĐANG TẠO ẢNH...";
+            btn.disabled = true;
+            logToSheet('Sao chép ảnh');
+
+            try {
+                const canvas = await html2canvas(voucher, { scale: 2, useCORS: true, backgroundColor: null });
+                canvas.toBlob(async (blob) => {
+                    try {
+                        const data = [new ClipboardItem({ [blob.type]: blob })];
+                        await navigator.clipboard.write(data);
+                        btn.innerText = "✅ ĐÃ SAO CHÉP! DÁN VÀO ZALO NHÉ";
+                    } catch (err) {
+                        alert("Lỗi trình duyệt: Không hỗ trợ copy ảnh trực tiếp.");
+                    }
+                });
+            } catch (error) {
+                alert("Lỗi khi xử lý ảnh.");
+            } finally {
+                setTimeout(() => {
+                    btn.innerText = "SAO CHÉP ẢNH (GỬI ZALO)";
+                    btn.disabled = false;
+                }, 3000);
+            }
+        }
+
+        /* --- TÍNH NĂNG TẢI ẢNH MỚI --- */
+        async function downloadVoucherImage() {
+            const btn = document.getElementById('btnDownload');
+            const voucher = document.getElementById('voucher-to-print');
+            const customerName = document.getElementById('inName').value || "KhachHang";
+            
+            btn.innerText = "⏳ ĐANG TẢI...";
+            btn.disabled = true;
+            logToSheet('Tải ảnh về máy');
+
+            try {
+                // Sử dụng html2canvas để chụp lại voucher
+                const canvas = await html2canvas(voucher, { 
+                    scale: 3, // Tăng chất lượng ảnh khi tải về
+                    useCORS: true, 
+                    backgroundColor: "#ffffff" 
+                });
+                
+                // Tạo link giả lập để tải ảnh
+                const link = document.createElement('a');
+                link.download = `Voucher-VuaNem-${customerName.replace(/\s+/g, '-')}.png`;
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+                
+                btn.innerText = "✅ TẢI THÀNH CÔNG";
+            } catch (error) {
+                console.error(error);
+                alert("Lỗi khi tải ảnh. Vui lòng thử lại.");
+            } finally {
+                setTimeout(() => {
+                    btn.innerText = "TẢI ẢNH VỀ ĐIỆN THOẠI";
+                    btn.disabled = false;
+                }, 2000);
+            }
+        }
+    </script>
+</body>
+</html>
