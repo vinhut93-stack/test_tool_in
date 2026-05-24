@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>🎈 English Kids Pro V5</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="./css/style.css">
+
+    <link rel="stylesheet" href="./css/animations.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+</head>
+
+<body>
+
+    <!-- LOADING -->
+
+    <div id="loading-screen">
+
+        <div class="loading-card">
+
+            <div class="loader"></div>
+
+            <h2>
+                🎈 English Kids Pro
+            </h2>
+
+            <p>
+                Đang tải bài học...
+            </p>
+
+        </div>
+
+    </div>
+
+    <!-- APP -->
+
+    <div class="app-container">
+
+        <!-- HEADER -->
+
+        <header class="top-bar">
+
+            <div class="brand">
+
+                <div class="mascot">
+                    🦉
+                </div>
+
+                <div>
+
+                    <h1>
+                        English Kids Pro
+                    </h1>
+
+                    <p>
+                        Learn English For Kids
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="top-stats">
+
+                <div class="stat xp">
+                    ⭐
+                    <span id="xp-count">
+                        0
+                    </span>
+                </div>
+
+                <div class="stat heart">
+                    ❤️
+                    <span id="heart-count">
+                        5
+                    </span>
+                </div>
+
+                <div class="stat streak">
+                    🔥
+                    <span id="streak-count">
+                        0
+                    </span>
+                </div>
+
+            </div>
+
+        </header>
+
+        <!-- FILTER -->
+
+        <section class="selectors">
+
+            <select id="age-group-select">
+            </select>
+
+            <select id="difficulty-select">
+
+                <option value="easy">
+                    🟢 Easy
+                </option>
+
+                <option value="normal">
+                    🟡 Normal
+                </option>
+
+                <option value="hard">
+                    🔴 Hard
+                </option>
+
+            </select>
+
+        </section>
+
+        <!-- PROGRESS -->
+
+        <section class="progress-wrap">
+
+            <div class="progress-text">
+
+                <span id="lesson-count">
+                    0/0
+                </span>
+
+                <span>
+                    Progress
+                </span>
+
+            </div>
+
+            <div class="progress-bar-bg">
+
+                <div id="progress-bar">
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- GAME -->
+
+        <section class="game-card">
+
+            <div class="mode-pill" id="mode-pill">
+
+                Easy Mode
+
+            </div>
+
+            <div class="image-box">
+
+                <img id="lesson-image" src="" alt="lesson">
+
+            </div>
+
+            <div class="meaning" id="meaning">
+
+                Meaning
+
+            </div>
+
+            <div id="word-display" class="word-display">
+
+                _ _ _
+
+            </div>
+
+            <!-- SELECTED LETTERS -->
+
+            <div id="selected-answer" class="selected-answer">
+
+            </div>
+
+            <!-- OPTIONS -->
+
+            <div id="letters-grid" class="letters-grid">
+
+            </div>
+
+            <!-- HARD MODE -->
+
+            <div id="typing-area" style="display:none;">
+
+                <input type="text" id="answer-input" placeholder="⌨️ Bé nhập từ vào đây">
+
+            </div>
+
+            <!-- FEEDBACK -->
+
+            <div id="feedback-msg" class="feedback">
+
+            </div>
+
+            <!-- BUTTONS -->
+
+            <div class="action-buttons">
+
+                <button id="btn-repeat" class="btn secondary">
+
+                    🔊 Nghe lại
+
+                </button>
+
+                <button id="btn-hint" class="btn warning">
+
+                    💡 Hint
+
+                </button>
+
+                <button id="btn-answer" class="btn success">
+
+                    👀 Đáp án
+
+                </button>
+
+                <button id="btn-check" class="btn primary">
+
+                    ✅ Kiểm tra
+
+                </button>
+
+            </div>
+
+            <!-- NAV -->
+
+            <div class="nav-buttons">
+
+                <button id="btn-back" class="btn glass">
+
+                    ⬅ Back
+
+                </button>
+
+                <button id="btn-next" class="btn primary">
+
+                    Next ➜
+
+                </button>
+
+            </div>
+
+        </section>
+
+    </div>
+
+    <!-- MUSIC -->
+
+    <audio id="bg-music" loop preload="auto">
+
+        <source
+            src="https://cdn.pixabay.com/download/audio/2022/03/10/audio_27077d0486.mp3?filename=soft-kids-piano-ambient-110397.mp3"
+            type="audio/mpeg">
+
+    </audio>
+
+    <button id="music-toggle" class="music-btn">
+
+        🎵
+
+    </button>
+
+    <script type="module" src="./js/app.js">
+    </script>
+
+</body>
+
+</html>
